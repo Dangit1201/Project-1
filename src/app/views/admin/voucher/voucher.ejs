@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <%- include('../layout/head.ejs', {title: "Thêm mã giảm giá" })%>
+
+<body>
+    <%- include('../layout/header.ejs') %>
+		
+	<%- include('../layout/sidebar.ejs') %><!--/.sidebar-->
+		
+	<div class="col-sm-9 col-sm-offset-3 col-lg-10 col-lg-offset-2 main">			
+		<div class="row">
+			<ol class="breadcrumb">
+				<li><a href="/admin"><span class="glyphicon glyphicon-home"></span></a></li>
+				<li class="active">Voucher</li>
+			</ol>
+		</div><!--/.row-->
+		
+		<div class="row">
+			<div class="col-lg-12">
+				<h1 class="page-header">Danh sách voucher</h1>
+			</div>
+		</div><!--/.row-->
+        
+		
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="panel panel-default">
+                   
+					<div class="panel-heading"> <a href="/admin/voucher/create" class="btn btn-success ">
+                        <i class="glyphicon glyphicon-plus"></i> Thêm voucher
+                    </a></div>
+					<div class="panel-body">
+						<table data-toggle="table" data-url="tables/data1.json"  data-show-refresh="true" data-show-toggle="true" data-show-columns="true" data-search="true" data-select-item-name="toolbar1" data-pagination="true" data-sort-name="name" data-sort-order="desc">
+						    <thead>
+						    <tr>
+						        
+						        <th data-field="id" data-sortable="true">TT</th>
+						        <th data-field="name"  data-sortable="true">Tên voucher</th>
+								<th data-field="code"  data-sortable="true">Mã voucher</th>
+						        <th data-field="price" data-sortable="true">Số lượng</th>
+								<th data-field="quantity" data-sortable="true">Số tiền giảm</th>
+								<th data-field="status" data-sortable="true">Trạng thái</th>
+								<th data-field="timeEnd" data-sortable="true">Hạn sử dụng</th>
+								<th data-field="act">Hành động</th>
+						    </tr>
+						    </thead>
+							<tbody >
+                                <% let count=1 %>
+                                <%for(x in voucher){%>
+                                <tr>
+                                    <td ><%= count++ %></td>
+                                    <td ><%=voucher[x].name%></td>
+									<td ><%=voucher[x].code%></td>
+                                    <td><%=voucher[x].quantity%></td>
+									<% if(voucher[x].quantityMoney){%>
+										<td><%=new Intl.NumberFormat("vi-VN", {style: "currency", currency: "VND"}).format(voucher[x].quantityMoney)%></td>
+									<% }else{ %>  
+										<td ><%=voucher[x].quantityPercent%>%(<%=new Intl.NumberFormat("vi-VN", {style: "currency", currency: "VND"}).format(voucher[x].quantityMoneyMax)%>)</td>
+									<% } %>
+									
+                                    <td><%=voucher[x].status%></td>
+                                    <td ><%=voucher[x].timeStart.toLocaleDateString('vi-VN')%>-><%=voucher[x].timeEnd.toLocaleDateString('vi-VN')%></td>
+                                    
+                                   
+                                    <td class="form-group">
+										<a href="/admin/voucher/edit/<%=voucher[x]._id%>" class="btn btn-primary"><i
+											class="glyphicon glyphicon-pencil"></i></a>
+                                        <a href="" class="btn btn-danger"  data-id="<%=voucher[x].id%>" data-title="<%=voucher[x].name%>" data-code="<%=voucher[x].code%>" data-toggle="modal" data-target="#delete-modal-dm"><i class="glyphicon glyphicon-remove" ></i></a>
+                                    </>
+                                </tr>
+                               
+                            <%}%>
+                                
+                            </tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div><!--/.row-->	
+		
+		<form name="delete-form-danhmuc" method="post"></form>
+	<!-- confirm -->
+	
+	<div id="delete-modal-dm"class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+		  <div class="modal-content">
+			<div id="modal-title-name" class="modal-header">
+			<h5 class="modal-title">Bạn có muốn xóa voucher này : <span id="spanproduct"></span>(<span id="spancode"></span>) ?</h5>
+			  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			  </button>
+			</div>
+			
+			<div class="modal-footer">
+			  <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+			  <button  id="btn-delete-form" type="button" class="btn btn-danger">Xóa bỏ</button>
+			</div>
+		  </div>
+		</div>
+	  </div>
+		
+	</div><!--/.main-->
+
+	<%- include('../layout/footer.ejs')%>
+	<script>
+		!function ($) {
+			$(document).on("click","ul.nav li.parent > a > span.icon", function(){		  
+				$(this).find('em:first').toggleClass("glyphicon-minus");	  
+			}); 
+			$(".sidebar span.icon").find('em:first').addClass("glyphicon-plus");
+		}(window.jQuery);
+
+		$(window).on('resize', function () {
+		  if ($(window).width() > 768) $('#sidebar-collapse').collapse('show')
+		})
+		$(window).on('resize', function () {
+		  if ($(window).width() <= 767) $('#sidebar-collapse').collapse('hide')
+		})
+	</script>
+	<script>
+		
+		document.addEventListener('DOMContentLoaded',function(){
+			$('#delete-modal-dm').on('show.bs.modal', function (event) {
+  			var button = $(event.relatedTarget) 
+  			ids = button.data('id');
+			titles = button.data('title');
+			code = button.data('code');
+			let modaltitlename = document.getElementById("spanproduct");
+			let modaltitlecode = document.getElementById("spancode");
+			modaltitlename.innerHTML = titles;
+			modaltitlecode.innerHTML = code;
+			})
+		});
+		var formdele = document.forms['delete-form-danhmuc'];
+		var btndele = document.getElementById('btn-delete-form');
+		
+		btndele.onclick = function(){
+			
+			formdele.action='/admin/voucher/delete/'+ids;
+			formdele.submit();
+			
+		}
+		
+		
+	</script>
+	<style>
+		.modal-title{
+		color: green;
+		text-align: center;
+		text-transform: uppercase capitalize;
+	}
+	#spanproduct{
+		color:blue;
+		
+	}
+	#spancode{
+		color: red;
+	}
+	</style>
+</body>
+
+</html>
